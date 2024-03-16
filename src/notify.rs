@@ -101,7 +101,7 @@ impl NotifyMessage {
     feature: String,
     pic: String,
   ) -> NotifyMessage {
-    let title = format!("【FineVis数据可视化】v{} 发布成功", version);
+    let title = format!("FineVis数据可视化\nv{} 发布成功", version);
     NotifyMessage {
       title,
       version,
@@ -115,7 +115,6 @@ impl NotifyMessage {
 
 #[cfg(test)]
 mod tests {
-  use std::result;
 
   #[test]
   fn get_feature_works() {
