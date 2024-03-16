@@ -15,3 +15,7 @@ tokio = { version =  "1.27.0", features = ["rt-multi-thread", "macros", "fs"] }
 anyhow = "1.0.72"
 chrono = { version = "*", features = ["serde"] }
 dotenv = "0.15.0"
+
+[dependencies.openssl-sys]
+version = "0.9.91"
+features = ["vendored"]
