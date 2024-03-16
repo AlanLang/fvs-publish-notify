@@ -1,5 +1,6 @@
 mod fvs;
 mod notify;
+use chrono::{DateTime, Datelike, Local, Timelike, Weekday};
 use std::env;
 use tokio::time;
 
@@ -16,6 +17,9 @@ async fn main() {
   let mut interval = time::interval(time::Duration::from_secs(2 * 60));
   loop {
     interval.tick().await;
+    if !can_work(&Local::now()) {
+      continue;
+    }
     if let Ok(publish_message) = fvs::fetch_fvs_publish_message().await {
       if let Some(related_plugins) = publish_message.result.related_plugins.get(0) {
         if related_plugins.pluginversion != version {
@@ -29,5 +33,50 @@ async fn main() {
         }
       }
     }
+  }
+}
+
+fn can_work(day: &DateTime<Local>) -> bool {
+  // 判断是否在周一到周五之间
+  let weekday = day.weekday();
+  let is_weekday = weekday != Weekday::Sat && weekday != Weekday::Sun;
+
+  // 判断是否在早晨 9 点到晚上 12 点之间
+  let is_between_9_and_12 = day.hour() >= 9 && day.hour() < 24;
+
+  is_weekday && is_between_9_and_12
+}
+
+#[cfg(test)]
+mod tests {
+  use chrono::TimeZone;
+
+  use super::*;
+
+  #[test]
+  fn test_weekday_morning() {
+    let dt = Local
+      .with_ymd_and_hms(2024, 3, 18, 8, 0, 0)
+      .single()
+      .unwrap(); // Saturday morning
+    assert!(!can_work(&dt)); // Should be false
+  }
+
+  #[test]
+  fn test_weekday_evening() {
+    let dt = Local
+      .with_ymd_and_hms(2024, 3, 18, 21, 0, 0)
+      .single()
+      .unwrap(); // Saturday morning
+    assert!(can_work(&dt)); // Should be false
+  }
+
+  #[test]
+  fn test_weekday_morning_boundaries() {
+    let dt = Local
+      .with_ymd_and_hms(2024, 3, 16, 10, 0, 0)
+      .single()
+      .unwrap(); // Saturday morning
+    assert!(!can_work(&dt)); // Should be false
   }
 }
