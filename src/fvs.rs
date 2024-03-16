@@ -1,10 +1,18 @@
 use chrono::{DateTime, Local};
+use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
 pub async fn fetch_fvs_publish_message() -> anyhow::Result<FvsPublishMessage> {
   let url =
     "https://market.fanruan.com/commodities?pg=plugin&id=2b55753a-3d27-45cc-997b-e450b6c33fbc";
-  let result = reqwest::get(url).await?.json::<FvsPublishMessage>().await?;
+  let client = Client::new();
+  let result = client
+    .get(url)
+    .header(reqwest::header::CACHE_CONTROL, "no-cache")
+    .send()
+    .await?
+    .json::<FvsPublishMessage>()
+    .await?;
   Ok(result)
 }
 
