@@ -1,0 +1,45 @@
+kind: pipeline
+name: default
+
+steps:
+- name: build
+  image: rust
+  commands:
+  - rustup target add x86_64-unknown-linux-musl
+  - apt update
+  - apt install -y musl-tools musl-dev
+  - cargo build --release --target x86_64-unknown-linux-musl
+  - cp ./target/x86_64-unknown-linux-musl/release/fvs-publish-notify .
+- name: copy file
+  image: appleboy/drone-scp
+  settings:
+    host:
+      from_secret: host
+    username:
+      from_secret: username
+    port: 22
+    key:
+      from_secret: key
+    source: fvs-publish-notify
+    target: ~/apps/fvs-publish-notify
+- name: deploy
+  image: ghcr.io/appleboy/drone-ssh
+  settings:
+    host:
+      from_secret: host
+    username:
+      from_secret: username
+    port: 22
+    key:
+      from_secret: key
+    script:
+      - sudo systemctl restart fvs-publish-notify.service
+      - sudo systemctl status fvs-publish-notify.service
+- name: notify
+  image: alanlang/drone-bark
+  settings:
+    bark_device: 
+      from_secret: bark_device
+    bark_group: Drone CI
+    bark_level: active
+    bark_sound: silence
