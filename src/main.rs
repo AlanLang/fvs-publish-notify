@@ -12,7 +12,9 @@ async fn main() {
   let publish_message = fvs::fetch_fvs_publish_message().await.unwrap();
   let related_plugins = publish_message.result.related_plugins.get(0).unwrap();
   let mut version = related_plugins.pluginversion.clone();
+  let now = Local::now();
   log::info!("server is start, version: {}", version);
+  log::info!("current time: {}", now.format("%Y-%m-%d %H:%M:%S"));
 
   let mut interval = time::interval(time::Duration::from_secs(5 * 60));
   let mut mon_interval = time::interval(time::Duration::from_secs(30));
