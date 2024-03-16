@@ -14,10 +14,19 @@ async fn main() {
   let mut version = related_plugins.pluginversion.clone();
   log::info!("server is start, version: {}", version);
 
-  let mut interval = time::interval(time::Duration::from_secs(2 * 60));
+  let mut interval = time::interval(time::Duration::from_secs(5 * 60));
+  let mut mon_interval = time::interval(time::Duration::from_secs(30));
+
   loop {
-    interval.tick().await;
-    if !can_work(&Local::now()) {
+    let now = Local::now();
+
+    if is_monday(&now) {
+      mon_interval.tick().await;
+    } else {
+      interval.tick().await;
+    }
+
+    if !can_work(&now) {
       continue;
     }
     if let Ok(publish_message) = fvs::fetch_fvs_publish_message().await {
@@ -45,6 +54,10 @@ fn can_work(day: &DateTime<Local>) -> bool {
   let is_between_9_and_12 = day.hour() >= 9 && day.hour() < 24;
 
   is_weekday && is_between_9_and_12
+}
+
+fn is_monday(day: &DateTime<Local>) -> bool {
+  day.weekday() == Weekday::Mon
 }
 
 #[cfg(test)]
