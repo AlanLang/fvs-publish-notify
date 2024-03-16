@@ -1,4 +1,4 @@
-use chrono::{DateTime, Local, Utc};
+use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 
 pub async fn fetch_fvs_publish_message() -> anyhow::Result<FvsPublishMessage> {
