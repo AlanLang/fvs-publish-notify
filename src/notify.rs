@@ -11,7 +11,7 @@ pub fn make_notify_message(publish_message: &FvsPublishMessageRelatedPlugin) -> 
       .to_string(),
     publish_message.jartime.format("%Y年%-m月%-d日").to_string(),
     get_feature(&publish_message.changenotes),
-    publish_message.pic.clone(),
+    "https://cdn.sa.net/2024/06/14/LId7vkfmDQzGpZl.png".to_string(),
   )
 }
 
