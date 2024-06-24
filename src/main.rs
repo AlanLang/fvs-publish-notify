@@ -17,16 +17,11 @@ async fn main() {
   log::info!("current time: {}", now.format("%Y-%m-%d %H:%M:%S"));
 
   let mut interval = time::interval(time::Duration::from_secs(5 * 60));
-  let mut mon_interval = time::interval(time::Duration::from_secs(30));
 
   loop {
     let now = Local::now();
 
-    if is_monday(&now) {
-      mon_interval.tick().await;
-    } else {
-      interval.tick().await;
-    }
+    interval.tick().await;
 
     if !can_work(&now) {
       continue;
@@ -38,6 +33,7 @@ async fn main() {
           log::info!("notify is start, version: {}", version);
           let notify_message = notify::make_notify_message(related_plugins);
           let bot_message = notify::BotMessage::from_notify_message(notify_message);
+          log::info!("send notify message: {:?}", bot_message);
           let _ = notify::send_notify_message(&wechat_bot_url, &bot_message).await;
         } else {
           log::info!("version is not change, version: {}", version);
@@ -48,18 +44,10 @@ async fn main() {
 }
 
 fn can_work(day: &DateTime<Local>) -> bool {
-  // 判断是否在周一到周五之间
-  let weekday = day.weekday();
-  let is_weekday = weekday != Weekday::Sat && weekday != Weekday::Sun;
+  // 判断是否在早晨 8 点到晚上 12 点之间
+  let is_between_9_and_12 = day.hour() >= 8 && day.hour() < 24;
 
-  // 判断是否在早晨 9 点到晚上 12 点之间
-  let is_between_9_and_12 = day.hour() >= 9 && day.hour() < 24;
-
-  is_weekday && is_between_9_and_12
-}
-
-fn is_monday(day: &DateTime<Local>) -> bool {
-  day.weekday() == Weekday::Mon
+  is_between_9_and_12
 }
 
 #[cfg(test)]
