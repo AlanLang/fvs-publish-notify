@@ -22,7 +22,7 @@ async fn main() {
   loop {
     let now = Local::now();
 
-    if is_monday(&now) {
+    if is_friday(&now) {
       mon_interval.tick().await;
     } else {
       interval.tick().await;
@@ -48,18 +48,14 @@ async fn main() {
 }
 
 fn can_work(day: &DateTime<Local>) -> bool {
-  // 判断是否在周一到周五之间
-  let weekday = day.weekday();
-  let is_weekday = weekday != Weekday::Sat && weekday != Weekday::Sun;
-
   // 判断是否在早晨 9 点到晚上 12 点之间
   let is_between_9_and_12 = day.hour() >= 9 && day.hour() < 24;
 
-  is_weekday && is_between_9_and_12
+  is_between_9_and_12
 }
 
-fn is_monday(day: &DateTime<Local>) -> bool {
-  day.weekday() == Weekday::Mon
+fn is_friday(day: &DateTime<Local>) -> bool {
+  day.weekday() == Weekday::Fri
 }
 
 #[cfg(test)]
